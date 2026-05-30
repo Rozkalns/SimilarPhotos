@@ -13,7 +13,8 @@
 - **Three input sources** — pick from library, snap with camera, or paste from clipboard
 - **Similarity scores** — each result shows a percentage match (green/orange/red)
 - **Save to album** — save found photos to a "Similar Photos" album in your photo library, with visual badges showing which results are already saved
-- **Quick actions** — long-press any result to copy to clipboard, favorite, save to album, or reject noise
+- **Find similar as this** — long-press any result and search for more like it, chain-explore through your library
+- **Quick actions** — long-press any result to copy to clipboard, favorite, save to album, delete from library, or reject noise
 - **Photo details** — tap a result to see the full image with date taken and GPS location
 - **Reject noise** — remove bad matches and visually similar junk with one tap
 - **Load more** — keep loading results beyond the initial 30

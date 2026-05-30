@@ -289,6 +289,15 @@ struct ContentView: View {
                                     }
                                     .contextMenu {
                                         Button {
+                                            viewModel.inputImage = result.image
+                                            Task {
+                                                await viewModel.search(image: result.image)
+                                            }
+                                        } label: {
+                                            Label("Find similar as this", systemImage: "magnifyingglass")
+                                        }
+
+                                        Button {
                                             UIPasteboard.general.image = result.image
                                         } label: {
                                             Label("Copy Image", systemImage: "doc.on.doc")
@@ -312,6 +321,12 @@ struct ContentView: View {
                                             viewModel.reject(result)
                                         } label: {
                                             Label("Remove noise like this", systemImage: "xmark.circle")
+                                        }
+
+                                        Button(role: .destructive) {
+                                            deletePhoto(result)
+                                        } label: {
+                                            Label("Delete from Library", systemImage: "trash")
                                         }
                                     }
                                 }
@@ -394,6 +409,20 @@ struct ContentView: View {
             addRequest?.addAssets([asset] as NSArray)
         }
         viewModel.refreshSavedIds()
+    }
+
+    func deletePhoto(_ result: PhotoResult) {
+        let assets = PHAsset.fetchAssets(withLocalIdentifiers: [result.id], options: nil)
+        guard let asset = assets.firstObject else { return }
+        PHPhotoLibrary.shared().performChanges {
+            PHAssetChangeRequest.deleteAssets([asset] as NSArray)
+        } completionHandler: { success, _ in
+            if success {
+                Task { @MainActor in
+                    viewModel.results.removeAll { $0.id == result.id }
+                }
+            }
+        }
     }
 
     func similarityColor(_ percent: Int) -> Color {
