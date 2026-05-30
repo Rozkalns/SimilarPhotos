@@ -44,7 +44,7 @@ The fastest and simplest path. Requires a Mac with Xcode (free).
 
 Uses [AltStore](https://altstore.io) or [SideStore](https://github.com/SideStore/SideStore) to sideload the pre-built IPA. Requires any computer (Mac/PC/Linux) for initial setup only.
 
-1. Set up AltStore or SideStore on your iPhone ([AltStore guide](https://faq.altstore.io/getting-started/how-to-install-altstore), [SideStore guide](https://docs.sidestore.io/docs/intro))
+1. Set up AltStore or SideStore on your iPhone ([AltStore install guide](https://faq.altstore.io/altstore-classic/how-to-install-altstore-macos), [AltStore getting started](https://faq.altstore.io/altstore-classic/your-altstore), [SideStore guide](https://docs.sidestore.io/docs/intro))
 2. Download the IPA from [Releases](https://github.com/Rozkalns/SimilarPhotos/releases/latest)
 3. Open the IPA with AltStore/SideStore to install
 4. Grant photo library access when prompted
