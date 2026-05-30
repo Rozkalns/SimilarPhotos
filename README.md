@@ -22,7 +22,7 @@
 ### Option A: AltStore PAL (EU only — no 7-day limit)
 
 1. **Install AltStore PAL** on your iPhone:
-   - Go to [altstore.io/pal](https://altstore.io/pal) on your iPhone's Safari
+   - Learn more at [AltStore PAL FAQ](https://faq.altstore.io/altstore-pal/what-is-altstore-pal) and install from the App Store or [altstore.io](https://altstore.io)
    - Follow the instructions to install the AltStore PAL marketplace
    - You may need to allow the marketplace in **Settings → General → VPN & Device Management**
 
