@@ -66,6 +66,14 @@ All of these require enrollment in the [$99/year Apple Developer Program](https:
 | AltStore Classic | **No** | Re-signs with user's own free Apple ID |
 | Build from Xcode | **No** | Uses user's own free Apple ID |
 
+## Support
+
+If you find this app useful, consider buying me a coffee:
+
+<a href="https://buymeacoffee.com/g5qwdzu3s">
+  <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee" />
+</a>
+
 ## How It Works
 
 1. **Indexing** — On first launch, the app loads a thumbnail of every photo and runs it through Apple's Vision neural network (`VNGenerateImageFeaturePrintRequest`), producing a 128-number fingerprint per image. These fingerprints are saved to disk (~20 MB for 25k photos).
