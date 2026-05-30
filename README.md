@@ -21,10 +21,11 @@
 
 ### Option A: AltStore PAL (EU only — no 7-day limit)
 
-1. **Install AltStore PAL** on your iPhone:
-   - Learn more at [AltStore PAL FAQ](https://faq.altstore.io/altstore-pal/what-is-altstore-pal) and install from the App Store or [altstore.io](https://altstore.io)
-   - Follow the instructions to install the AltStore PAL marketplace
-   - You may need to allow the marketplace in **Settings → General → VPN & Device Management**
+1. **Install AltStore PAL** on your iPhone (requires iOS 18.0+, EU or Japan):
+   - Go to [altstore.io/download](https://altstore.io/download) in Safari on your iPhone
+   - Tap **Download** — a "Marketplace Installation" alert will appear
+   - Open **Settings** → tap **Allow Marketplace From AltStore LLC** (at the top under your Apple ID)
+   - Return to the page, tap **Download** again → select **Install App Marketplace**
 
 2. **Add the Similar Photos source:**
    - Open AltStore PAL
