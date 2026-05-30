@@ -2,13 +2,15 @@ import SwiftUI
 import PhotosUI
 import Photos
 
-struct PhotoResult: Identifiable {
+struct PhotoResult: Identifiable, Equatable {
+    static func == (lhs: PhotoResult, rhs: PhotoResult) -> Bool { lhs.id == rhs.id }
+
     let id: String
     let image: UIImage
     let distance: Float
 
     var similarityPercent: Int {
-        max(0, min(100, Int((1 - distance / 40) * 100)))
+        max(0, min(100, Int((1 - distance / 8) * 100)))
     }
 }
 
@@ -50,6 +52,7 @@ class PhotoSearchViewModel {
     }
 
     private var currentLimit = 30
+    var savedIds: Set<String> = []
 
     func search(image: UIImage) async {
         currentLimit = 30
@@ -68,6 +71,7 @@ class PhotoSearchViewModel {
         results = zip(matches, images).map { match, img in
             PhotoResult(id: match.identifier, image: img, distance: match.distance)
         }
+        refreshSavedIds()
 
         isSearching = false
         statusText = ""
@@ -94,6 +98,22 @@ class PhotoSearchViewModel {
         statusText = ""
     }
 
+    func refreshSavedIds() {
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.predicate = NSPredicate(format: "title = %@", "Similar Photos")
+        let albums = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
+        guard let album = albums.firstObject else {
+            savedIds = []
+            return
+        }
+        let assets = PHAsset.fetchAssets(in: album, options: nil)
+        var ids = Set<String>()
+        for i in 0..<assets.count {
+            ids.insert(assets.object(at: i).localIdentifier)
+        }
+        savedIds = ids
+    }
+
     func reject(_ result: PhotoResult) {
         let rejectedPrint = result.distance
         let threshold: Float = 5
@@ -101,10 +121,42 @@ class PhotoSearchViewModel {
     }
 }
 
+struct CameraPicker: UIViewControllerRepresentable {
+    var onCapture: (UIImage) -> Void
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator { Coordinator(onCapture: onCapture) }
+
+    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let onCapture: (UIImage) -> Void
+        init(onCapture: @escaping (UIImage) -> Void) { self.onCapture = onCapture }
+
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            if let image = info[.originalImage] as? UIImage {
+                onCapture(image)
+            }
+            picker.dismiss(animated: true)
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            picker.dismiss(animated: true)
+        }
+    }
+}
+
 struct ContentView: View {
     @State private var viewModel = PhotoSearchViewModel()
     @State private var selectedItem: PhotosPickerItem?
     @State private var selectedResult: PhotoResult?
+    @State private var showCamera = false
 
     var body: some View {
         NavigationStack {
@@ -133,12 +185,20 @@ struct ContentView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
 
-                    HStack(spacing: 12) {
+                    HStack(spacing: 8) {
                         PhotosPicker(selection: $selectedItem, matching: .images) {
                             Label("Library", systemImage: "photo.on.rectangle")
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.borderedProminent)
+
+                        Button {
+                            showCamera = true
+                        } label: {
+                            Label("Camera", systemImage: "camera")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
 
                         Button {
                             guard let clipped = UIPasteboard.general.image else { return }
@@ -151,7 +211,6 @@ struct ContentView: View {
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.bordered)
-                        .disabled(viewModel.indexedCount == 0)
                     }
                     .disabled(viewModel.indexedCount == 0)
 
@@ -184,7 +243,7 @@ struct ContentView: View {
 
                             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 4) {
                                 ForEach(currentResults) { result in
-                                    ZStack(alignment: .topTrailing) {
+                                    ZStack {
                                         Image(uiImage: result.image)
                                             .resizable()
                                             .scaledToFill()
@@ -192,23 +251,67 @@ struct ContentView: View {
                                             .clipped()
                                             .clipShape(RoundedRectangle(cornerRadius: 6))
 
-                                        Text("\(result.similarityPercent)%")
-                                            .font(.caption2.bold())
-                                            .padding(.horizontal, 4)
-                                            .padding(.vertical, 2)
-                                            .background(similarityColor(result.similarityPercent).opacity(0.85))
-                                            .foregroundStyle(.white)
-                                            .clipShape(RoundedRectangle(cornerRadius: 4))
-                                            .padding(4)
+                                        VStack {
+                                            HStack {
+                                                Spacer()
+                                                Text("\(result.similarityPercent)%")
+                                                    .font(.caption2.bold())
+                                                    .padding(.horizontal, 4)
+                                                    .padding(.vertical, 2)
+                                                    .background(similarityColor(result.similarityPercent).opacity(0.85))
+                                                    .foregroundStyle(.white)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                                                    .padding(4)
+                                            }
+                                            Spacer()
+                                            if viewModel.savedIds.contains(result.id) {
+                                                HStack {
+                                                    Spacer()
+                                                    HStack(spacing: 3) {
+                                                        Image(systemName: "checkmark")
+                                                            .font(.caption2.bold())
+                                                        Text("Saved")
+                                                            .font(.caption2.bold())
+                                                    }
+                                                    .padding(.horizontal, 6)
+                                                    .padding(.vertical, 3)
+                                                    .background(.green)
+                                                    .foregroundStyle(.white)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                                                    .padding(4)
+                                                }
+                                            }
+                                        }
                                     }
+                                    .frame(width: 110, height: 110)
                                     .onTapGesture {
                                         selectedResult = result
                                     }
                                     .contextMenu {
+                                        Button {
+                                            UIPasteboard.general.image = result.image
+                                        } label: {
+                                            Label("Copy Image", systemImage: "doc.on.doc")
+                                        }
+
+                                        Button {
+                                            toggleFavorite(result)
+                                        } label: {
+                                            Label("Favorite", systemImage: "heart")
+                                        }
+
+                                        Button {
+                                            addResultToAlbum(result)
+                                        } label: {
+                                            Label("Save to Album", systemImage: "rectangle.stack.badge.plus")
+                                        }
+
+                                        Divider()
+
                                         Button(role: .destructive) {
                                             viewModel.reject(result)
                                         } label: {
-                                            Label("Not similar — remove noise like this", systemImage: "xmark.circle")
+                                            Label("Remove noise like this", systemImage: "xmark.circle")
                                         }
                                     }
                                 }
@@ -241,10 +344,56 @@ struct ContentView: View {
                     await viewModel.search(image: image)
                 }
             }
+            .sheet(isPresented: $showCamera) {
+                CameraPicker { image in
+                    viewModel.inputImage = image
+                    Task {
+                        await viewModel.search(image: image)
+                    }
+                }
+                .ignoresSafeArea()
+            }
             .sheet(item: $selectedResult) { result in
                 PhotoDetailView(result: result)
             }
+            .onChange(of: selectedResult) { old, new in
+                if old != nil && new == nil {
+                    viewModel.refreshSavedIds()
+                }
+            }
         }
+    }
+
+    func toggleFavorite(_ result: PhotoResult) {
+        let assets = PHAsset.fetchAssets(withLocalIdentifiers: [result.id], options: nil)
+        guard let asset = assets.firstObject else { return }
+        try? PHPhotoLibrary.shared().performChangesAndWait {
+            let request = PHAssetChangeRequest(for: asset)
+            request.isFavorite = !asset.isFavorite
+        }
+    }
+
+    func addResultToAlbum(_ result: PhotoResult) {
+        let albumName = "Similar Photos"
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.predicate = NSPredicate(format: "title = %@", albumName)
+        var albums = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
+
+        if albums.firstObject == nil {
+            try? PHPhotoLibrary.shared().performChangesAndWait {
+                PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: albumName)
+            }
+            albums = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
+        }
+
+        guard let album = albums.firstObject,
+              let asset = PHAsset.fetchAssets(withLocalIdentifiers: [result.id], options: nil).firstObject else { return }
+
+        try? PHPhotoLibrary.shared().performChangesAndWait {
+            let addRequest = PHAssetCollectionChangeRequest(for: album)
+            addRequest?.addAssets([asset] as NSArray)
+        }
+        viewModel.refreshSavedIds()
     }
 
     func similarityColor(_ percent: Int) -> Color {
@@ -338,7 +487,7 @@ struct PhotoDetailView: View {
 
         let fetchOptions = PHFetchOptions()
         fetchOptions.predicate = NSPredicate(format: "title = %@", albumName)
-        let existingAlbums = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
+        var albums = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
 
         let asset = PHAsset.fetchAssets(withLocalIdentifiers: [result.id], options: nil)
         guard let photoAsset = asset.firstObject else {
@@ -346,17 +495,25 @@ struct PhotoDetailView: View {
             return
         }
 
+        if albums.firstObject == nil {
+            do {
+                try PHPhotoLibrary.shared().performChangesAndWait {
+                    PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: albumName)
+                }
+            } catch {
+                albumError = error.localizedDescription
+                return
+            }
+            albums = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
+        }
+
+        guard let album = albums.firstObject else {
+            albumError = "Could not create album"
+            return
+        }
+
         do {
             try PHPhotoLibrary.shared().performChangesAndWait {
-                let album: PHAssetCollection
-                if let existing = existingAlbums.firstObject {
-                    album = existing
-                } else {
-                    let request = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: albumName)
-                    let placeholder = request.placeholderForCreatedAssetCollection
-                    let result = PHAssetCollection.fetchAssetCollections(withLocalIdentifiers: [placeholder.localIdentifier], options: nil)
-                    album = result.firstObject!
-                }
                 let addRequest = PHAssetCollectionChangeRequest(for: album)
                 addRequest?.addAssets([photoAsset] as NSArray)
             }

@@ -10,12 +10,15 @@
 ## Features
 
 - **Indexed search** — builds a visual fingerprint of every photo once, then searches instantly
-- **Paste from clipboard** — copy an image from Messages/Safari/anywhere, paste to search
+- **Three input sources** — pick from library, snap with camera, or paste from clipboard
 - **Similarity scores** — each result shows a percentage match (green/orange/red)
-- **Reject noise** — long-press a bad result to remove it and similar junk
+- **Save to album** — save found photos to a "Similar Photos" album in your photo library, with visual badges showing which results are already saved
+- **Quick actions** — long-press any result to copy to clipboard, favorite, save to album, or reject noise
 - **Photo details** — tap a result to see the full image with date taken and GPS location
+- **Reject noise** — remove bad matches and visually similar junk with one tap
 - **Load more** — keep loading results beyond the initial 30
 - **Shortcuts integration** — use "Find Similar Photos" as a Shortcuts action
+- **100% on-device** — no data ever leaves your phone
 
 ## Install on iPhone
 
