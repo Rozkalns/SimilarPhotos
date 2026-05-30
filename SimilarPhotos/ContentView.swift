@@ -259,6 +259,8 @@ struct PhotoDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var assetDate: Date?
     @State private var assetLocation: String?
+    @State private var addedToAlbum = false
+    @State private var albumError: String?
 
     var body: some View {
         NavigationStack {
@@ -295,14 +297,21 @@ struct PhotoDetailView: View {
                     .foregroundStyle(.secondary)
 
                     Button {
-                        if let url = URL(string: "photos-redirect://") {
-                            UIApplication.shared.open(url)
-                        }
+                        addToAlbum()
                     } label: {
-                        Label("Open Photos App", systemImage: "arrow.up.forward.app")
+                        Label(addedToAlbum ? "Added to Album" : "Save to \"Similar Photos\" Album",
+                              systemImage: addedToAlbum ? "checkmark.circle.fill" : "rectangle.stack.badge.plus")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
+                    .tint(addedToAlbum ? .green : .blue)
+                    .disabled(addedToAlbum)
+
+                    if let error = albumError {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
                 }
                 .padding()
             }
@@ -321,6 +330,39 @@ struct PhotoDetailView: View {
                     assetLocation = String(format: "%.4f, %.4f", loc.latitude, loc.longitude)
                 }
             }
+        }
+    }
+
+    private func addToAlbum() {
+        let albumName = "Similar Photos"
+
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.predicate = NSPredicate(format: "title = %@", albumName)
+        let existingAlbums = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
+
+        let asset = PHAsset.fetchAssets(withLocalIdentifiers: [result.id], options: nil)
+        guard let photoAsset = asset.firstObject else {
+            albumError = "Could not find photo"
+            return
+        }
+
+        do {
+            try PHPhotoLibrary.shared().performChangesAndWait {
+                let album: PHAssetCollection
+                if let existing = existingAlbums.firstObject {
+                    album = existing
+                } else {
+                    let request = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: albumName)
+                    let placeholder = request.placeholderForCreatedAssetCollection
+                    let result = PHAssetCollection.fetchAssetCollections(withLocalIdentifiers: [placeholder.localIdentifier], options: nil)
+                    album = result.firstObject!
+                }
+                let addRequest = PHAssetCollectionChangeRequest(for: album)
+                addRequest?.addAssets([photoAsset] as NSArray)
+            }
+            addedToAlbum = true
+        } catch {
+            albumError = error.localizedDescription
         }
     }
 }
