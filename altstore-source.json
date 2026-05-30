@@ -1,7 +1,7 @@
 {
   "name": "Roberts' Apps",
   "identifier": "com.homesweethome.altstore",
-  "sourceURL": "",
+  "sourceURL": "https://raw.githubusercontent.com/Rozkalns/SimilarPhotos/main/altstore-source.json",
   "apps": [
     {
       "name": "Similar Photos",
@@ -10,9 +10,9 @@
       "version": "1.0",
       "versionDate": "2026-05-30",
       "versionDescription": "Find visually similar photos in your library using Vision framework fingerprinting. Paste from clipboard or pick from library.",
-      "downloadURL": "",
+      "downloadURL": "https://github.com/Rozkalns/SimilarPhotos/releases/download/v1.0/SimilarPhotos.ipa",
       "localizedDescription": "Similar Photos scans your photo library and builds a visual fingerprint index. Search by picking a photo or pasting from clipboard to find visually similar images. Shows similarity percentage, photo date, and location.",
-      "iconURL": "https://raw.githubusercontent.com/OWNER/SimilarPhotos/main/icon.png",
+      "iconURL": "https://raw.githubusercontent.com/Rozkalns/SimilarPhotos/main/icon.png",
       "size": 0,
       "minOSVersion": "17.0",
       "permissions": [
