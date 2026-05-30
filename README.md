@@ -19,49 +19,11 @@
 
 ## Install on iPhone
 
-### Option A: AltStore PAL (EU only — no 7-day limit)
+> **The unfortunate reality of iOS app distribution:** Apple does not allow free distribution of apps outside the App Store. Even "alternative" marketplaces like AltStore PAL (EU) require Apple notarization, which needs the $99/year Apple Developer Program. Sideloading tools like SideStore exist but require complex setup. The practical options for a free, open-source app are listed below.
 
-1. **Install AltStore PAL** on your iPhone (requires iOS 18.0+, EU or Japan):
-   - Go to [altstore.io/download](https://altstore.io/download) in Safari on your iPhone
-   - Tap **Download** — a "Marketplace Installation" alert will appear
-   - Open **Settings** → tap **Allow Marketplace From AltStore LLC** (at the top under your Apple ID)
-   - Return to the page, tap **Download** again → select **Install App Marketplace**
+### Option A: Build from Xcode (recommended)
 
-2. **Add the Similar Photos source:**
-   - Open AltStore PAL
-   - Go to **Sources** (or **Browse**)
-   - Tap **Add Source**
-   - Paste this URL:
-     ```
-     https://raw.githubusercontent.com/Rozkalns/SimilarPhotos/main/altstore-source.json
-     ```
-
-3. **Install the app:**
-   - Find "Similar Photos" in the source
-   - Tap **Install**
-   - Open the app, grant photo library access when prompted
-   - Wait for initial indexing (takes a few minutes depending on library size)
-
-### Option B: AltStore Classic (worldwide — 7-day re-sign)
-
-1. **Install AltStore** on your computer and iPhone:
-   - Download AltServer from [altstore.io](https://altstore.io) on your Mac or PC
-   - Run AltServer, connect your iPhone via USB
-   - Install AltStore to your iPhone through AltServer
-
-2. **Download the IPA:**
-   - Go to [Releases](https://github.com/Rozkalns/SimilarPhotos/releases/latest)
-   - Download `SimilarPhotos.ipa` to your phone
-
-3. **Install via AltStore:**
-   - Open AltStore on your iPhone
-   - Go to **My Apps** → tap the **+** button
-   - Select the downloaded `SimilarPhotos.ipa`
-   - The app installs and is signed with your Apple ID
-
-4. **Important:** AltStore Classic apps expire every 7 days. Keep AltServer running on your computer and connect to the same WiFi as your iPhone to auto-refresh.
-
-### Option C: Build from source (any region, requires Mac)
+The fastest and simplest path. Requires a Mac with Xcode (free).
 
 1. Install [Xcode](https://apps.apple.com/app/xcode/id497799835) (free) from the Mac App Store
 2. Clone this repo:
@@ -70,10 +32,36 @@
    ```
 3. Open `SimilarPhotos.xcodeproj` in Xcode
 4. Go to **Signing & Capabilities** → select your Apple ID as the team
-5. Add **Privacy - Photo Library Usage Description** in the **Info** tab if not already present
-6. Connect your iPhone via USB, select it as the build target
-7. Press **Cmd+R** to build and run
-8. On first run, trust the developer certificate: **Settings → General → VPN & Device Management → Trust**
+5. Add **Privacy - Photo Library Usage Description** in the **Info** tab with value: `This app scans your photo library to find visually similar images.`
+6. On your iPhone: **Settings → Privacy & Security → Developer Mode → enable** (requires restart)
+7. Connect your iPhone via USB, select it as the build target
+8. Press **Cmd+R** to build and run
+9. On first run, trust the developer certificate: **Settings → General → VPN & Device Management → Trust**
+
+**Note:** With a free Apple ID, the app expires after 7 days and needs to be reinstalled. If you have a friend with a Mac and Xcode, they can plug your phone in and reinstall in 30 seconds.
+
+### Option B: AltStore Classic (worldwide — no Mac required after setup)
+
+Uses [AltStore](https://altstore.io) or [SideStore](https://github.com/SideStore/SideStore) to sideload the pre-built IPA. Requires any computer (Mac/PC/Linux) for initial setup only.
+
+1. Set up AltStore or SideStore on your iPhone ([AltStore guide](https://faq.altstore.io/getting-started/how-to-install-altstore), [SideStore guide](https://docs.sidestore.io/docs/intro))
+2. Download the IPA from [Releases](https://github.com/Rozkalns/SimilarPhotos/releases/latest)
+3. Open the IPA with AltStore/SideStore to install
+4. Grant photo library access when prompted
+
+**Note:** Apps signed with a free Apple ID expire every 7 days. AltStore requires AltServer on a computer for weekly re-signing. SideStore handles re-signing on-device but has a more complex initial setup.
+
+### Why not AltStore PAL / App Store / TestFlight?
+
+All of these require enrollment in the [$99/year Apple Developer Program](https://developer.apple.com/programs/):
+
+| Method | Requires $99/yr? | Why |
+|--------|:-:|---|
+| App Store | Yes | Apple review + paid developer account |
+| TestFlight | Yes | Distributed through App Store Connect |
+| AltStore PAL (EU) | Yes | Apps must be [notarized by Apple](https://faq.altstore.io/developers/distribute-with-altstore-pal) |
+| AltStore Classic | **No** | Re-signs with user's own free Apple ID |
+| Build from Xcode | **No** | Uses user's own free Apple ID |
 
 ## How It Works
 
